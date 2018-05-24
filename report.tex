@@ -25,12 +25,9 @@
 
 \bibliography{references.bib}
 
-
-%TODO: 'bit-squatting' or 'bit squatting'?
-
 \begin{document}
 
-\title{title goes here \\\vspace{5mm} \large  \today}
+\title{DNS bitsquatting\\\vspace{5mm} \large  \today}
 \author{
 \IEEEauthorblockN{Adrien Raulot}
 \IEEEauthorblockA{
@@ -66,9 +63,9 @@ suspect that sometimes, due to random variations, errors might naturally occur.
 When an error occurs, one might query for and subsequently connect to a domain
 which one never intended to communicate with.
 
-In this paper we will investigate likely causes for bit flips [TODO: in
-different devices] and attempt to determine whether the resulting attack,
-bit-squatting, is still viable.
+In this paper we will investigate likely causes for bit flips in desktop
+computers and attempt to determine whether the resulting attack, bitsquatting,
+is still viable.
 
 %TODO: insert a disorderly substitute for a table of contents here, because that's how Science(TM) likes it.
 
@@ -76,7 +73,7 @@ bit-squatting, is still viable.
 \section{Research Questions}\label{sec:researchq}
 
 Our main research question is:
-{\it Is bit-squatting a viable attack?}
+{\it Is bitsquatting a viable attack?}
 
 \vspace{0.1cm}
 
@@ -86,9 +83,9 @@ Our main research question is:
     \item What could a bit-squatting attack be used for?
 	\item What circumstances cause random bit errors?
 	%\item Which kinds of devices are susceptible to random bit errors? TODO: uncomment if applicable
-	\item Are random bit errors currently occurring in the wild? %TODO: better phrasing for 'in the wild'
+	\item Are random bit errors currently occurring in the IT ecosystem? %TODO: better phrasing for 'in the wild'
 	\item Are organisations mitigating the risk by pre-emptively purchasing
-	      bit-squat domains?
+	      bitsquat domains?
 \end{enumerate}
 
 
@@ -104,18 +101,111 @@ whether this is the result of a random bit error.
 
 \section{Related Work}\label{sec:relwork}
 
-TODO
-
+In 2011, Artem Dinaburg presented for the first time the bitsquatting attack at
+the DEFCON 19 security conference. In his
+whitepaper\cite{dinaburg2011bitsquatting}, he describes bitsquatting as an
+attack relying on random bit errors to redirect connections intended for
+popular domains to domains registered by malicious entities. Since 2011, only
+very few research papers have been published about bitsquatting, therefore the
+purpose of this research. Another research from 2011 by Nick et
+al.\cite{nikiforakis2013bitsquatting} showed that bitsquatting was still
+popular by monitoring newly registered bitsquatting domains over a period of
+270 days. In this period, a total of 5,366 different bitsquatting domains
+targeting 491 out of the Alexa top 500 domains were registered.
 
 \section{Methods}\label{sec:method}
 
-TODO
+Although random bit flips are theoretically possible, the unlikeliness of a bit flip in
+practice is important. Bit flips or soft errors are more likely to occur in certain
+circumstances such as high temperature, low voltage, high speed, alpha
+particles, cosmic rays, and others. This not only may have an impact on the
+applications running on a system but also raises security concerns as attacks
+such as the bitsquatting attack we describe in this paper may take advantage of
+soft errors. During this research, we mainly focused on producing soft errors
+in memory modules, although we also tested and monitored the hard disk and the network for
+bit flips. Nowadays, Error-Correcting Code memory is commonly used in most
+computers where data corruption cannot be tolerated.
 
+Firstly, we acquired an experimental desktop [TODO: talk about the server also?] and implemented three types of test program to monitor bit flips:
+
+\begin{itemize}
+  % TODO: For each, quote appendix
+  \item Memory: [TODO: describe program]
+  \item Disk: [TODO: describe program]
+  \item Network: [TODO: describe program]
+\end{itemize}
+
+Secondly, we registered and monitored 4 bitsquatting domains:
+
+\begin{itemize}
+  \item eoogle.be
+  \item eoogle.nl
+  \item whatsapx.net
+  \item whatsapx.co.uk
+\end{itemize}
+
+\begin{table}[H]
+  \centering
+  \caption{Bitsquatting vs original domain names}
+  \label{table-bits}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Domain}   & \textbf{Bits} \\ \hline
+    eoogle   & 01100101... \\ \hline
+    google   & 011001\textbf{1}1... \\ \hline
+    whatsapx & ...01111000 \\ \hline
+    whatsapp & ...0111\textbf{0}000 \\ \hline
+   \end{tabular}
+\end{table}
 
 \subsection{Experimental Setup}\label{sec:setup}
 
-TODO
+From the different fault injection techniques known to
+exist\cite{barenghi2012fault}, we decided to use heat. This technique is
+realistic of situations where desktop computers, servers and smartphones are
+impacted by high temperatures and it is a relatively cheap and easy technique
+to set up. Although this technique may possibly damage the hardware, we were
+careful to place the disposable hardware in a safe environment and constantly
+measure the temperature. The latter however has been more difficult than we
+expected, as we were not able to retrieve thermal values from the system. To
+circumvent this, we monitored the hard drive temperature as an indactor and
+manually measured the temperature of the CPU and memory with a infrared
+temperature sensor gun.
 
+In order to heat up the memory, disk and CPU while letting the tests (described
+in section \ref{sec:method}) run, the first step was to cover the air inputs
+while always keeping the computer case closed and taking care of letting air
+flow through the Power Supply Unit (PSU). Since this had a very low impact on
+the components temperature, next step was to cover the computer with a cloth to
+prevent heat from dissipating. Although this had a bigger impact on the overall
+computer internals temperature, we were not able to produce any bit flips.
+Therefore, we eventually ended up manually heating the memory modules with a
+hair dryer. Hereafter is a table representing stepstones in the temperature
+increase during the experiments:
+
+%TODO: Very basic for now, more for clear visualization, feel free to modify / add
+\begin{table}[H]
+  \centering
+  \caption{Temperature levels}
+  \label{table-temp}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Component}   & \textbf{Min. (Celsius)} & \textbf{Max. (Celsius)}\\ \hline
+    CPU   & ? & 100? \\ \hline
+    Memory & ? & 90? \\ \hline
+    Disk & 40? & 60? \\ \hline
+   \end{tabular}
+\end{table}
+
+
+Server:
+- DDR2 ECC memory
+
+Desktop:
+- 2 * 2 GB of DDR non-ECC memory
+
+
+%TODO: *Rowhammer
 
 \section{Discussion}\label{sec:disc}
 
