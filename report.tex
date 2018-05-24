@@ -23,10 +23,10 @@
     maxcitenames=2
 ]{biblatex}
 
-
-%\addbibresource{main.bib}
 \bibliography{references.bib}
 
+
+%TODO: 'bit-squatting' or 'bit squatting'?
 
 \begin{document}
 
@@ -50,62 +50,86 @@ os3-ot@lucgommans.nl}
 
 \begin{abstract}
 
-    todo
+	In this paper we will investigate the current state of random DNS bit flips.
+	While random bit errors in a machine are not very common, the number of DNS
+	queries performed worldwide is extremely large. This might lead one to query
+	for a domain name, and subsequently connect to the resulting IP address, which
+	one never intended to connect to.
 
 \end{abstract}
 
 \section{Introduction}
 
-todo
+The vast majority of internet-connected computers perform DNS requests during
+conventional use. Because the requests are so ubiquitous, there is reason to
+suspect that sometimes, due to random variations, errors might naturally occur.
+When an error occurs, one might query for and subsequently connect to a domain
+which one never intended to communicate with.
+
+In this paper we will investigate likely causes for bit flips [TODO: in
+different devices] and attempt to determine whether the resulting attack,
+bit-squatting, is still viable.
+
+%TODO: insert a disorderly substitute for a table of contents here, because that's how Science(TM) likes it.
 
 
 \section{Research Questions}\label{sec:researchq}
 
 Our main research question is:
-{\it TODO?}
+{\it Is bit-squatting a viable attack?}
 
 \vspace{0.1cm}
 
 \noindent{} This main research question divides in four sub-questions:
 
 \begin{enumerate}
-    \item todo
+    \item What could a bit-squatting attack be used for?
+	\item What circumstances cause random bit errors?
+	%\item Which kinds of devices are susceptible to random bit errors? TODO: uncomment if applicable
+	\item Are random bit errors currently occurring in the wild? %TODO: better phrasing for 'in the wild'
+	\item Are organisations mitigating the risk by pre-emptively purchasing
+	      bit-squat domains?
 \end{enumerate}
 
 
 \section{Ethical Considerations}\label{sec:ethics}
 
-todo
+Most of our work will focus on attempting to find causes of random bit errors.
+However, in order to learn whether random bit errors are currently occuring in
+practice, we will need to work with real domains and user data. This data is
+kept confidential and will be destroyed after completion of the project. The
+domains we register will not be used for anything other than determining
+whether this is the result of a random bit error.
 
 
 \section{Related Work}\label{sec:relwork}
 
-todo
+TODO
 
 
 \section{Methods}\label{sec:method}
 
-todo
+TODO
 
 
 \subsection{Experimental Setup}\label{sec:setup}
 
-todo
+TODO
 
 
 \section{Discussion}\label{sec:disc}
 
-todo
+TODO
 
 
 \section{Conclusion}\label{sec:conc}
 
-todo
+TODO
 
 
 \section{Future Work}\label{sec:futwork}
 
-todo
+TODO
 
 
 \printbibliography
