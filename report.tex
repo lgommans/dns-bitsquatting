@@ -80,12 +80,19 @@ Our main research question is:
 \noindent{} This main research question divides in four sub-questions:
 
 \begin{enumerate}
-    \item What could a bit-squatting attack be used for?
+    \item What could a bitsquatting attack be used for?
 	\item What circumstances cause random bit errors?
 	\item Can we detect random bit errors currently occurring around the world?
 	\item Are organisations mitigating the risk by pre-emptively purchasing
 	      bitsquat domains?
 \end{enumerate}
+
+One important exclusion is network equipment. In this work, we only looked at
+bit flips occurring on a common computer. Mobile equipment is only partially
+targeted: to answer the third sub-question, we purposefully registered a domain
+that is popular on mobile devices, but we did not ourselves attempt to trigger
+memory corruption on a mobile device. If this occurs a lot on mobile devices,
+we should observe a larger number of hits on that domain.
 
 
 \section{Ethical Considerations}\label{sec:ethics}
@@ -104,87 +111,138 @@ In 2011, Artem Dinaburg presented for the first time the bitsquatting attack at
 the DEFCON 19 security conference. In his
 whitepaper\cite{dinaburg2011bitsquatting}, he describes bitsquatting as an
 attack relying on random bit errors to redirect connections intended for
-popular domains to domains registered by malicious entities. Since 2011, only
-very few research papers have been published about bitsquatting, therefore the
-purpose of this research. Another research from 2011 by Nick et
+popular domains to domains registered by malicious entities. Since 2011, very
+few research papers have been published about bitsquatting, hence this
+research. Another research from 2011 by Nick et
 al.\cite{nikiforakis2013bitsquatting} showed that bitsquatting was still
 popular by monitoring newly registered bitsquatting domains over a period of
-270 days. In this period, a total of 5,366 different bitsquatting domains
-targeting 491 out of the Alexa top 500 domains were registered.
+270 days. In this period, a total of 5 366 different bitsquatting domains were
+registered, targeting 491 out of the Alexa top 500 domains.
 
-\section{Methods}\label{sec:method}
+\section{Experimental setup}\label{sec:setup}
+
+\subsection{Heating experiments}
 
 Although random bit flips are theoretically possible, the unlikeliness of a bit
 flip in practice is important. Bit flips or soft errors are more likely to
 occur in certain circumstances such as high temperature, low voltage, high
 speed, alpha particles, cosmic rays, and others. This not only may have an
-impact on the applications running on a system but also raises security
-concerns as attacks such as the bitsquatting attack we describe in this paper
+impact on the applications running on a system, but also raises security
+concerns as attacks, such as the bitsquatting attack we describe in this paper
 may take advantage of soft errors. During this research, we mainly focused on
 producing soft errors in memory modules, although we also tested and monitored
 the hard disk and the network for bit flips. Nowadays, Error-Correcting Code
-memory is commonly used in most computers where data corruption cannot be
-tolerated.
-
-Firstly, we acquired an experimental desktop [TODO: talk about the server
-also?] and implemented three types of test program to monitor bit flips:
-
-\begin{itemize}
-  % TODO: For each, quote appendix
-  \item Memory: [TODO: describe program]
-  \item Disk: [TODO: describe program]
-  \item Network: [TODO: describe program]
-\end{itemize}
-
-Secondly, we registered and monitored 4 bitsquatting domains:
-
-\begin{itemize}
-  \item eoogle.be
-  \item eoogle.nl
-  \item whatsapx.net
-  \item whatsapx.co.uk
-\end{itemize}
-
-\begin{table}[H]
-  \centering
-  \caption{Bitsquatting vs original domain names}
-  \label{table-bits}
-  \begin{tabular}{|l|l|l|}
-    \hline
-    \textbf{Domain}   & \textbf{Bits} \\ \hline
-    eoogle   & 01100101... \\ \hline
-    google   & 011001\textbf{1}1... \\ \hline
-    whatsapx & ...01111000 \\ \hline
-    whatsapp & ...0111\textbf{0}000 \\ \hline
-   \end{tabular}
-\end{table}
-
-\subsection{Experimental Setup}\label{sec:setup}
+(ECC) memory is commonly used in most computers where data corruption has a
+large impact.
 
 From the different fault injection techniques known to
 exist\cite{barenghi2012fault}, we decided to use heat. This technique is
 realistic of situations where desktop computers, servers and smartphones are
-impacted by high temperatures and it is a relatively cheap and easy technique
-to set up. Although this technique may possibly damage the hardware, we were
-careful to place the disposable hardware in a safe environment and constantly
-measure the temperature. The latter however has been more difficult than we
-expected, as we were not able to retrieve thermal values from the system. To
-circumvent this, we monitored the hard drive temperature as an indactor and
-manually measured the temperature of the CPU and memory with a infrared
-temperature sensor gun.
+impacted by high temperatures and it is a relatively cheap technique to set up.
+Because this technique could damage the hardware, we were careful to place the
+disposable hardware in a safe environment and constantly monitor the
+temperature. The latter, however, has been more difficult than we expected, as
+we were not able to retrieve thermal values from the system. To remedy this, we
+monitored the hard drive temperature as an indicator and manually measured the
+temperature of the CPU and memory with a infrared temperature sensor gun.
 
-In order to heat up the memory, disk and CPU while letting the tests (described
-in section \ref{sec:method}) run, the first step was to cover the air inputs
-while always keeping the computer case closed and taking care of letting air
-flow through the Power Supply Unit (PSU). Since this had a very low impact on
-the components temperature, next step was to cover the computer with a cloth to
-prevent heat from dissipating. Although this had a bigger impact on the overall
-computer internals temperature, we were not able to produce any bit flips.
-Therefore, we eventually ended up manually heating the memory modules with a
-hair dryer. Hereafter is a table representing stepstones in the temperature
-increase during the experiments:
+We acquired a disposable desktop to experiment on and implemented three types
+of test program to monitor bit flips:
 
-%TODO: Very basic for now, more for clear visualization, feel free to modify / add
+% TODO: For each, quote appendix
+%TODO: I don't like this style of subsubsections. Maybe documentclass article instead?
+\subsubsection{Memory test}
+
+Our memory tester retrieves \texttt{(2**12)-1} bytes of random data from
+\texttt{/dev/urandom} to use as random pattern. We configure it to allocate
+95\% of free memory, which it fills with this random pattern. The amount of
+random bytes is chosen to explicitly not align to a memory page, so that each
+page contains a new byte as first byte. A few redundant copies of the correct
+pattern are kept separately.
+
+After writing the pattern to the allocated memory, which consists of several
+gigabytes so it cannot still be in CPU caches, we read the data again
+sequentially and compare it against our pattern. We also make sure that the
+pattern's copies are all equal.
+
+After a few iterations, the random pattern is refreshed by reading new data
+from \texttt{/dev/urandom}. If some patterns are more susceptible to
+alterations than others, this should hopefully reveal that. Upon discovery of
+an error, both the correct pattern and the pattern which we found instead are
+logged.
+
+\subsubsection{Disk test}
+
+The disk test is similar to the memory test because it also reads an uneven
+number of bytes from \texttt{/dev/urandom} and writes that to a large file on
+disk. Here, too, we made sure that the file is large enough not to fit in
+memory caches, and the pattern is refreshed after a few iterations of writing
+and reading.
+
+The main difference is that we do not keep redundant copies of the correct
+pattern, as we are not attempting to detect memory corruption here. Any memory
+corruption should be evident from the other program.
+
+The source code is available on Github: %TODO
+
+\subsubsection{Network test}
+
+The network test consists of two parts: a transmitter and a receiver. We used a
+servers (in the same building) to transmit the data, and ran a receiver on the
+experimental hardware. The packets transmitted are based on UDP, containing
+1200 bytes payload. The first byte is a tracking number: it will increment
+every time the payload changes. The last 32 bytes are a sha-256 hash of the
+rest of the payload. Finally, the remainder of the payload is, again, data read
+from \texttt{/dev/urandom}, and is changed every 30 seconds.
+
+The incremental number allows us to do a byte-by-byte check of the data, to
+compare it against the previously received packets. If it is unequal, we know
+that the payload changed and that we should recompute the hash. If the data was
+not equal, the hash would also be recomputed because this should no longer
+match. If it does not match, we log the last known correct contents and the
+corrupted contents.
+
+Data was transmitted at a rate of about 800 megabits per second (bursting 50
+packets and then calling nanosleep). We checked for packet loss, and this was
+low. This only occurred when the target system was too busy to drain its
+receive buffer, and was not caused by network equipment. We consider this to
+have no impact on our results.
+
+\subsubsection{Desktop setup}
+
+The desktop contains $2\times2$GB DDR2 RAM memory, an Intel Pentium D processor
+and a 2TB Hitachi hard disk drive. More recent hardware was not considered
+disposable by the university and therefore off limits for any sort of
+experiment. The only alternative was an old server with ECC memory, which we
+considered unfit for our purpose. Our CPU did not seem to contain a readable
+temperature sensor: online we find many posts of users, on both Linux-based and
+Windows operating systems, who find that they are unable to read the
+temperature sensor. To have some notion of the machine's temperature, we used a
+handheld infrared thermometer and the hard drive temperature.
+
+In the machine, we created an isolated air inlet for the power supply unit
+(PSU) and otherwise taped off all air intakes and outtakes. Aside from the PSU,
+the CPU fan is the only fan in the system, which we left plugged in: this
+circulates the hot air through the case and heats up other components such as
+the memory.
+
+During the tests, we run the three scripts in parallel. The CPU is a dual core
+without hyperthreading, so our network receive and RAM test scripts could run
+in parallel at nearly full speed. The disk test script also ran at full speed,
+since the majority of the time was spent on I/O. This also had the effect of
+putting the system under full load, generating a lot of heat.
+
+Because the machine did not reach thermal cut-off temperature and did not
+produce any bit errors yet, we later also covered it with a cloth to prevent
+heat from dissipating through the metal cover. While this had a bigger impact
+on the overall internal temperature, we were not able to produce any bit flips
+or reach cut-off temperature. Finally, we attempted heating the memory modules
+with a hair dryer, similar to the memory corruption experiments described by
+\cite{jvm}. This experiment was halted when the hair dryer melted and the
+computer continued to run without any issues. The following table table shows
+milestones in the temperature increase during the experiments:
+
+%TODO: Very basic for now, more for clear visualization
 \begin{table}[H]
   \centering
   \caption{Temperature levels}
@@ -199,11 +257,42 @@ increase during the experiments:
 \end{table}
 
 
-Server:
-- DDR2 ECC memory
+\subsection{Registering bit squatting domains}
 
-Desktop:
-- 2 * 2 GB of DDR non-ECC memory
+For our second experiment, we registered and monitored 5 domains:
+
+\begin{itemize}
+  \item \texttt{eoogle.be.}
+  \item \texttt{eoogle.nl.}
+  \item \texttt{eoogle.co.uk.}
+  \item \texttt{whatsapx.net.}
+  \item \texttt{a9u9h.nl.}
+\end{itemize}
+
+The latter is a control domain, registered to be able to see the difference
+between a bitsquatting domain and any other, unlisted domain. We picked the
+name using a random number generator to make sure users did not stumble upon it
+by accident. The name is short, so that it can be brute-forced by NSEC3 walks
+(the \texttt{.nl} zone is DNSSEC-enabled). If our other domains are being found
+via this method, then we will also see this on our control domain, and we know
+that this traffic does not originate from random bit flips.
+
+In table \ref{tab:bits} we show which bits were flipped for each domain.
+
+\begin{table}[H]
+  \centering
+  \caption{Bitsquatting vs. original domain names}
+  \label{tab:bits}
+  \begin{tabular}{|l|l|l|}
+    \hline
+    \textbf{Domain}   & \textbf{Bits} \\ \hline
+    eoogle   & 01100101... \\ \hline
+    google   & 011001\textbf{1}1... \\ \hline
+    whatsapx & ...01111000 \\ \hline
+    whatsapp & ...0111\textbf{0}000 \\ \hline
+   \end{tabular}
+\end{table}
+
 
 
 %TODO: *Rowhammer
