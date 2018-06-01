@@ -150,9 +150,10 @@ of test program to monitor bit flips:
 % TODO: For each, quote appendix
 %TODO: I don't like this style of subsubsections. Maybe documentclass article instead?
 % A: Agreed, I still like the IEEE style though. Will do the appendix tomorrow.
+% L: I made these subsections for unrelated reasons (though it's a nice side-effect). Not sure this point is still relevant ^^
 \subsection{Memory test}
 
-Our memory tester retrieves \texttt{(2**12)-1} bytes of random data from
+Our memory tester retrieves $(2^{12})-1$ bytes of random data from
 \texttt{/dev/urandom} to use as random pattern. We configure it to allocate
 95\% of free memory, which it fills with this random pattern. The amount of
 random bytes is chosen to explicitly not align to a memory page, so that each
@@ -207,6 +208,8 @@ low. This only occurred when the target system was too busy to drain its
 receive buffer, and was not caused by network equipment. We consider this to
 have no impact on our results.
 
+%TODO source code
+
 \subsection{Desktop setup}
 
 The desktop contains $2\times2$GB DDR2 RAM memory, an Intel Pentium D processor
@@ -238,8 +241,12 @@ on the overall internal temperature, we were not able to produce any bit flips
 or reach cut-off temperature. Finally, we attempted heating the memory modules
 with a hair dryer, similar to the memory corruption experiments described by
 \cite{jvm}. This experiment was halted when the hair dryer started melting and the
-computer continued to run without any issues. The following table shows
-milestones in the temperature increase during the experiments:
+computer continued to run without any issues.
+
+\subsection{Experiment 1: Results}
+
+The following table shows milestones in the temperature increase during the
+experiments:
 
 %TODO: Very basic for now, more for clear visualization
 \begin{table}[H]
@@ -297,9 +304,79 @@ In table \ref{tab:bits} we show which bits were flipped for each domain.
    \end{tabular}
 \end{table}
 
-\subsection{Bitsquatting results}
+%TODO this paragraph should be separate somewhere
+We noticed that for many domains which we would have liked to register, such as
+bitsquats of \texttt{google.com} or \texttt{facebook.com}, the domains were
+already occupied. For \texttt{google.com}, many of the domains are owned by
+Google, but a few are not. Generating bitsquat domains is not difficult and
+domains are not expensive, so we assume this was not an attempt at preventing
+bitsquatting. For \texttt{facebook.com}, the situation is reversed: some are
+owned by Facebook, and many are owned by external parties. Many of the bitsquat
+domains lead to websites with advertisements. For other popular domains, we
+notice similar patterns. This answers one of our research questions: companies
+do not seem to be trying to prevent bitsquatting.
 
-TODO
+To gather the results for the domains we registered, we ran a DNS server for
+all domains. For each domain, we returned a unique IP address of ours.
+Hypothetically, we would see a client with a random bit error query for
+\texttt{e19.whatsapx.net}, give it the IP address \texttt{145.100.108.252}, and
+then observe it attempting to build a TCP connection with that IP address on a
+port used by WhatsApp.
+
+We used tcpdump's pcap-writing functionality to monitor this usage. Each of the
+used IP addresses referred to the same server, making monitoring easier.
+
+
+\subsection{Experiment 2: Results}
+
+The control domain received 3 500 hits from the registrar (SIDN) and partners
+(OpenIntel). These queried for various record types for the domain and the
+subdomains \texttt{www}, \texttt{\_dmarc} and \texttt{\_domainkey}.
+
+The other domains got many hits. It appears that \texttt{.co.uk} domains are
+publicly listed, as we received 52 700 unsolicited queries of various types (A,
+AAAA, TXT, NS, MX, etc.). In contrast, \texttt{eoogle.be} saw 12 000 queries
+and \texttt{eoogle.nl} saw 6 600.
+
+In 2011, Dinaburg\cite{dinaburg2011bitsquatting} recorded 52 000 bitsquat
+requests over a period of 7 months, using 29 domains. This comes down to about
+8.4 requests per domain per day. Perhaps memory got less error-prone to the
+extent that the increased usage of the internet since 2011 is negated, but that
+seems doubtful. We should probably see at least an equal number of requests.
+However, to find those within a total of 169 700 queries, turned out to be
+quite difficult.
+
+The results were loaded into a relational database for easier querying. We
+filtered the data in various ways, such as only listing queries from IP
+addresses that were seen only once (since those errors are supposed to be rare)
+and were querying for a normal record type, such as A or AAAA. Investigating
+this list by looking in the gathered pcaps, we find that these IP addresses
+never follow up on the response they were given. In some cases, a completely
+different IP address (sometimes from a different continent, compared to the
+original address) immediately attempts to contact the IP address that we
+returned. They often attempt to contact a random port, not used by the service
+we are bitsquatting.
+
+Another query we attempted filters on addresses which we only saw 1-4 times and
+which queried for both the A and AAAA records. It is typical to query for both,
+so a legitimate client should do that. This yielded only 58 records: some from
+Google and some from DigitalOcean, but also some promising-looking resolvers
+such as from Level3. Looking in pcaps again, we found no normal follow-up
+traffic.
+
+No matter how we cut or slice the dataset, in no case does an IP address show
+both normal resolver behaviour and follow up with normal traffic. Some of the
+ones without follow-up traffic could be caused by bit errors, as a response for
+the wrong query name might be ignored (if a resolver queries for A and gets an
+answer for B, it might ignore it depending on where the error occurred), but
+we cannot verify this with any certainty.
+
+We also noticed a large number of queries from many different IP addresses at
+Amazon AWS and Google (presumably their AWS-equivalent), as well as various
+research institutes and other services which advertise themselves as DNS
+scanners. There is some irony in watching the watchmen watch us.
+
+% TODO: check if complete
 
 
 \section{Experiment 3: Rowhammer}
@@ -317,9 +394,13 @@ From the latter, we ran the general tests, the specific one for our Ivy Bridge
 hardware, and the JavaScript-based one.
 
 
-\subsection{Rowhammer results}\label{sec:results}
+\subsection{Experiment 3: Results}
 
-TODO
+The experimental hardware for experiment 1 is definitely not vulnerable, as the
+memory is too old. On our server and workstations, the test suites did not
+manage to trigger the attack. It appears that our hardware is not vulnerable.
+
+%TODO this is rather brief, but not sure what more to say. Maybe something like "well if we can't even trigger it when we *try*..."
 
 
 \section{Discussion}\label{sec:disc}
