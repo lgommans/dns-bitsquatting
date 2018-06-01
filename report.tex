@@ -119,9 +119,7 @@ popular by monitoring newly registered bitsquatting domains over a period of
 270 days. In this period, a total of 5 366 different bitsquatting domains were
 registered, targeting 491 out of the Alexa top 500 domains.
 
-\section{Experimental setup}\label{sec:setup}
-
-\subsection{Heating experiments}
+\section{Experiment 1: Heating}
 
 Although random bit flips are theoretically possible, the unlikeliness of a bit
 flip in practice is important. Bit flips or soft errors are more likely to
@@ -151,7 +149,7 @@ of test program to monitor bit flips:
 
 % TODO: For each, quote appendix
 %TODO: I don't like this style of subsubsections. Maybe documentclass article instead?
-\subsubsection{Memory test}
+\subsection{Memory test}
 
 Our memory tester retrieves \texttt{(2**12)-1} bytes of random data from
 \texttt{/dev/urandom} to use as random pattern. We configure it to allocate
@@ -171,7 +169,7 @@ alterations than others, this should hopefully reveal that. Upon discovery of
 an error, both the correct pattern and the pattern which we found instead are
 logged.
 
-\subsubsection{Disk test}
+\subsection{Disk test}
 
 The disk test is similar to the memory test because it also reads an uneven
 number of bytes from \texttt{/dev/urandom} and writes that to a large file on
@@ -185,7 +183,7 @@ corruption should be evident from the other program.
 
 The source code is available on Github: %TODO
 
-\subsubsection{Network test}
+\subsection{Network test}
 
 The network test consists of two parts: a transmitter and a receiver. We used a
 servers (in the same building) to transmit the data, and ran a receiver on the
@@ -208,7 +206,7 @@ low. This only occurred when the target system was too busy to drain its
 receive buffer, and was not caused by network equipment. We consider this to
 have no impact on our results.
 
-\subsubsection{Desktop setup}
+\subsection{Desktop setup}
 
 The desktop contains $2\times2$GB DDR2 RAM memory, an Intel Pentium D processor
 and a 2TB Hitachi hard disk drive. More recent hardware was not considered
@@ -257,7 +255,7 @@ milestones in the temperature increase during the experiments:
 \end{table}
 
 
-\subsection{Registering bit squatting domains}
+\section{Experiment 2: Bitsquatting}
 
 For our second experiment, we registered and monitored 5 domains:
 
@@ -277,6 +275,11 @@ by accident. The name is short, so that it can be brute-forced by NSEC3 walks
 via this method, then we will also see this on our control domain, and we know
 that this traffic does not originate from random bit flips.
 
+The bitsquat domains were chosen because we expect they get a lot of hits, and
+because they should give a diversity of devices. For example, the WhatsApp
+mobile application uses \texttt{whatsapp.net} rather than
+\texttt{whatsapp.com}.
+
 In table \ref{tab:bits} we show which bits were flipped for each domain.
 
 \begin{table}[H]
@@ -293,9 +296,30 @@ In table \ref{tab:bits} we show which bits were flipped for each domain.
    \end{tabular}
 \end{table}
 
+\subsection{Bitsquatting results}
+
+TODO
 
 
-%TODO: *Rowhammer
+\section{Experiment 3: Rowhammer}
+
+High memory densities create an increased rate of electromagnetic interactions
+between memory cells\cite{kim2014flipping}. Our third experiment focuses on
+accidental or intentional leaking of currency into nearby cells, possibly
+causing bit flips that way.
+
+We first needed to assert how likely this is when one tries to do this
+intentionally. To test this, we used two different test suites: one by the team
+at Google's Project Zero\footnote{\url{https://github.com/google/rowhammer-test}}
+and one by Gruss et al.\cite{gruss2016rowhammer}\footnote{\url{https://github.com/IAIK/rowhammerjs}}.
+From the latter, we ran the general tests, the specific one for our Ivy Bridge
+hardware, and the JavaScript-based one.
+
+
+\subsection{Rowhammer results}\label{sec:results}
+
+TODO
+
 
 \section{Discussion}\label{sec:disc}
 
