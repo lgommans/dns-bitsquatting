@@ -149,6 +149,7 @@ of test program to monitor bit flips:
 
 % TODO: For each, quote appendix
 %TODO: I don't like this style of subsubsections. Maybe documentclass article instead?
+% A: Agreed, I still like the IEEE style though. Will do the appendix tomorrow.
 \subsection{Memory test}
 
 Our memory tester retrieves \texttt{(2**12)-1} bytes of random data from
@@ -236,21 +237,21 @@ heat from dissipating through the metal cover. While this had a bigger impact
 on the overall internal temperature, we were not able to produce any bit flips
 or reach cut-off temperature. Finally, we attempted heating the memory modules
 with a hair dryer, similar to the memory corruption experiments described by
-\cite{jvm}. This experiment was halted when the hair dryer melted and the
-computer continued to run without any issues. The following table table shows
+\cite{jvm}. This experiment was halted when the hair dryer started melting and the
+computer continued to run without any issues. The following table shows
 milestones in the temperature increase during the experiments:
 
 %TODO: Very basic for now, more for clear visualization
 \begin{table}[H]
   \centering
-  \caption{Temperature levels}
+  \caption{Temperature levels during experiments}
   \label{table-temp}
   \begin{tabular}{|l|l|l|}
     \hline
     \textbf{Component}   & \textbf{Min. (Celsius)} & \textbf{Max. (Celsius)}\\ \hline
-    CPU   & ? & 100? \\ \hline
-    Memory & ? & 90? \\ \hline
-    Disk & 40? & 60? \\ \hline
+    CPU   & 55 & 96 \\ \hline
+    Memory & N/A & 90 \\ \hline
+    Disk & 44 & 60 \\ \hline
    \end{tabular}
 \end{table}
 
@@ -322,6 +323,17 @@ TODO
 
 
 \section{Discussion}\label{sec:disc}
+
+When we analyzed the ingress traffic of our bitsquatting domains, we noticed
+that a lot of traffic was comming from research institutes such as universities
+or laboratories. Moreover, our servers received a large amount of requests
+coming from Google and Amazon IP spaces, indicating VPS scanning for these
+specific bitsquatting domains.  Although there is no easy way to prevent this,
+it was very difficult to filter the noisy traffic out from the legitimate and
+potentially bitflip-related traffic. This also poses a design problem about
+bitsquatting experiments, the fact that researchers monitoring the Internet for
+bitsquatting domains used by attackers end up querying bitsquatting domains set
+up by other researchers.
 
 TODO
 
