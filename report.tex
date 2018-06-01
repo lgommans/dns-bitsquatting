@@ -114,18 +114,20 @@ targeting 491 out of the Alexa top 500 domains were registered.
 
 \section{Methods}\label{sec:method}
 
-Although random bit flips are theoretically possible, the unlikeliness of a bit flip in
-practice is important. Bit flips or soft errors are more likely to occur in certain
-circumstances such as high temperature, low voltage, high speed, alpha
-particles, cosmic rays, and others. This not only may have an impact on the
-applications running on a system but also raises security concerns as attacks
-such as the bitsquatting attack we describe in this paper may take advantage of
-soft errors. During this research, we mainly focused on producing soft errors
-in memory modules, although we also tested and monitored the hard disk and the network for
-bit flips. Nowadays, Error-Correcting Code memory is commonly used in most
-computers where data corruption cannot be tolerated.
+Although random bit flips are theoretically possible, the unlikeliness of a bit
+flip in practice is important. Bit flips or soft errors are more likely to
+occur in certain circumstances such as high temperature, low voltage, high
+speed, alpha particles, cosmic rays, and others. This not only may have an
+impact on the applications running on a system but also raises security
+concerns as attacks such as the bitsquatting attack we describe in this paper
+may take advantage of soft errors. During this research, we mainly focused on
+producing soft errors in memory modules, although we also tested and monitored
+the hard disk and the network for bit flips. Nowadays, Error-Correcting Code
+memory is commonly used in most computers where data corruption cannot be
+tolerated.
 
-Firstly, we acquired an experimental desktop [TODO: talk about the server also?] and implemented three types of test program to monitor bit flips:
+Firstly, we acquired an experimental desktop [TODO: talk about the server
+also?] and implemented three types of test program to monitor bit flips:
 
 \begin{itemize}
   % TODO: For each, quote appendix
