@@ -8,8 +8,8 @@
 
 #define RANDOM_SRC "/dev/urandom"
 #define P_LENGTH 4 * 1000
-#define SET_ITERATIONS 60
-#define READ_ITERATIONS 5
+#define SET_ITERATIONS 1
+#define READ_ITERATIONS 1
 
 /*int sig_handler(int signo) {
     if (signo == SIGINT)
