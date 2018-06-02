@@ -409,23 +409,26 @@ manage to trigger the attack. It appears that our hardware is not vulnerable.
 
 \section{Discussion}\label{sec:disc}
 
-When we analyzed the ingress traffic of our bitsquatting domains, we noticed
-that a lot of traffic was comming from research institutes such as universities
-or laboratories. Moreover, our servers received a large amount of requests
-coming from Google and Amazon IP spaces, indicating VPS scanning for these
-specific bitsquatting domains.  Although there is no easy way to prevent this,
-it was very difficult to filter the noisy traffic out from the legitimate and
-potentially bitflip-related traffic. This also poses a design problem about
-bitsquatting experiments, the fact that researchers monitoring the Internet for
-bitsquatting domains used by attackers end up querying bitsquatting domains set
-up by other researchers.
-
-TODO
-
+Since part of our bitsquatting domains ingress traffic was comming from
+research institutes such as universities or laboratories and there is no easy
+way to prevent this, it was very difficult to filter the noisy traffic out from
+the legitimate and potentially bitflip-related traffic. This also poses a
+design problem about bitsquatting experiments, the fact that researchers
+monitoring the Internet for bitsquatting domains used by attackers end up
+querying bitsquatting domains set up by other researchers. Moreover, traffic
+monitoring experiments should be carried out during a longer period, as three
+weeks is not enough to be able to clearly identify interesting traffic due to
+bit flips.
 
 \section{Conclusion}\label{sec:conc}
 
-TODO
+After several tentatives to produce bit flips in a desktop computer by using
+the rowhammer attack as well as inventive ways of heating up the hardware, the
+latter was surprisingly resilient and we could not observe any bit flips.
+Registering and analyzing traffic from bitsquatting domains revealed that
+bitsquatting domains are still very popular, although complications in
+filtering out the traffic as well as abnormal behavior from clients contacting
+the domains resulted in a very few legitimate requests.
 
 
 \section{Future Work}\label{sec:futwork}
