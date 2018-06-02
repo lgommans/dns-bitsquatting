@@ -94,37 +94,37 @@ import os, binascii
 testrunnum = 0
 
 while True:
-if testrunnum % 4 == 0:
-  print('Generating new pattern.')
-pattern = os.urandom(patternlength)
+  if testrunnum % 4 == 0:
+    print('Generating new pattern.')
+    pattern = os.urandom(patternlength)
 
   testrunnum += 1
 
   f = open(path, 'wb')
   wrotebytes = 0
   while wrotebytes < filesize - patternlength:
-f.write(pattern)
-  wrotebytes += patternlength
-f.close()
+    f.write(pattern)
+    wrotebytes += patternlength
+  f.close()
 
   f = open(path, 'rb')
   readbytes = 0
   while readbytes < filesize - patternlength:
-r = f.read(patternlength)
-  readbytes += patternlength
-  if r != pattern:
-  print('Changed! Original:')
-print(binascii.hexliy(pattern))
-  print('Result:')
-print(binascii.hexliy(r))
-  print('-------------')
+    r = f.read(patternlength)
+    readbytes += patternlength
+    if r != pattern:
+      print('Changed! Original:')
+      print(binascii.hexliy(pattern))
+      print('Result:')
+      print(binascii.hexliy(r))
+      print('-------------')
 
   print('Test run {} complete.'.format(testrunnum))
-  \end{lstlisting}
+\end{lstlisting}
 
-  \section{Network test}\label{Apdx-network}
-  \subsection{Transmitter}
-  \begin{lstlisting}[language=C++]
+\section{Network test}\label{Apdx-network}
+\subsection{Transmitter}
+\begin{lstlisting}[language=C++]
 #include <sys/socket.h>
 #include <netdb.h>
 #include <memory.h>
@@ -136,7 +136,7 @@ print(binascii.hexliy(r))
 #include <unistd.h>
 #include <stdlib.h>
 
-  using namespace std;
+using namespace std;
 
 void sha256(const unsigned char* str, int len, unsigned char* hash)
 {
@@ -272,48 +272,48 @@ msglen = 1200  # Bytes that should be in each packet
 errlimit = 5000  # Die after this many errors
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sock.bind(('', int(sys.argv[1])))
+sock.bind(('', int(sys.argv[1])))
 
-  lastevo = None
-  lastdata = None
-  rounds = 0
-  errs = 0
+lastevo = None
+lastdata = None
+rounds = 0
+errs = 0
 
-  def err():
-    global errs
-    if errs > errlimit:
-  print('Exiting due to too many errors.')
-   exit(5)
-   errs += 1
+def err():
+  global errs
+  if errs > errlimit:
+    print('Exiting due to too many errors.')
+    exit(5)
+  errs += 1
 
-   while True:
-data = sock.recv(msglen)
+while True:
+  data = sock.recv(msglen)
   if len(data) != msglen:
-  print('WARN: data length incorrect.')
-err()
+    print('WARN: data length incorrect.')
+    err()
 
   if data[0] != lastevo:
-  print('New evo after {} rounds.'.format(rounds))
-  rounds = 0
+    print('New evo after {} rounds.'.format(rounds))
+    rounds = 0
 
   if data[0] != lastevo or not data == lastdata:
-  if data[-hashlen_bytes:] == hashlib.sha256(data[:-hashlen_bytes]).digest():
-    if data != lastdata and data[0] == lastevo:
-    print('Note: new data, same evo, but correct hash.')
+    if data[-hashlen_bytes:] == hashlib.sha256(data[:-hashlen_bytes]).digest():
+      if data != lastdata and data[0] == lastevo:
+      print('Note: new data, same evo, but correct hash.')
 
     lastdata = data
     lastevo = data[0]
-    else:
-err()
-  print('Hash error in data:')
-print(binascii.hexlify(data))
-  if data[0] == lastevo:
-  print('Correct was:')
-print(binascii.hexlify(lastdata))
   else:
-  lastdata = None
+    err()
+    print('Hash error in data:')
+    print(binascii.hexlify(data))
+    if data[0] == lastevo:
+      print('Correct was:')
+      print(binascii.hexlify(lastdata))
+    else:
+      lastdata = None
 
-  rounds += 1
-  \end{lstlisting}
+rounds += 1
+\end{lstlisting}
 
-  \end{appendices}
+\end{appendices}
