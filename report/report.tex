@@ -149,7 +149,8 @@ monitored the hard drive temperature as an indicator and manually measured the
 temperature of the CPU and memory with a infrared temperature sensor gun.
 
 We acquired a disposable desktop to experiment on and implemented three types
-of test program to monitor bit flips:
+of test program\footnote{\url{https://github.com/lgommans/dns-bitsquatting/}}
+to monitor bit flips:
 
 % TODO: For each, quote appendix
 %TODO: I don't like this style of subsubsections. Maybe documentclass article instead?
@@ -157,12 +158,12 @@ of test program to monitor bit flips:
 % L: I made these subsections for unrelated reasons (though it's a nice side-effect). Not sure this point is still relevant ^^
 \subsection{Memory test}
 
-Our memory tester retrieves $(2^{12})-1$ bytes of random data from
-\texttt{/dev/urandom} to use as random pattern. We configure it to allocate
-95\% of free memory, which it fills with this random pattern. The amount of
-random bytes is chosen to explicitly not align to a memory page, so that each
-page contains a new byte as first byte. A few redundant copies of the correct
-pattern are kept separately.
+Our memory tester (Appendix \ref{Apdx-memory}) retrieves $(2^{12})-1$ bytes of
+random data from \texttt{/dev/urandom} to use as random pattern. We configure
+it to allocate 95\% of free memory, which it fills with this random pattern.
+The amount of random bytes is chosen to explicitly not align to a memory page,
+so that each page contains a new byte as first byte. A few redundant copies of
+the correct pattern are kept separately.
 
 After writing the pattern to the allocated memory, which consists of several
 gigabytes so it cannot still be in CPU caches, we read the data again
@@ -177,27 +178,26 @@ logged.
 
 \subsection{Disk test}
 
-The disk test is similar to the memory test because it also reads an uneven
-number of bytes from \texttt{/dev/urandom} and writes that to a large file on
-disk. Here, too, we made sure that the file is large enough not to fit in
-memory caches, and the pattern is refreshed after a few iterations of writing
-and reading.
+The disk test (Appendix \ref{Apdx-disk}) is similar to the memory test because
+it also reads an uneven number of bytes from \texttt{/dev/urandom} and writes
+that to a large file on disk. Here, too, we made sure that the file is large
+enough not to fit in memory caches, and the pattern is refreshed after a few
+iterations of writing and reading.
 
 The main difference is that we do not keep redundant copies of the correct
 pattern, as we are not attempting to detect memory corruption here. Any memory
 corruption should be evident from the other program.
 
-The source code is available on Github: %TODO
-
 \subsection{Network test}
 
-The network test consists of two parts: a transmitter and a receiver. We used a
-servers (in the same building) to transmit the data, and ran a receiver on the
-experimental hardware. The packets transmitted are based on UDP, containing
-1200 bytes payload. The first byte is a tracking number: it will increment
-every time the payload changes. The last 32 bytes are a sha-256 hash of the
-rest of the payload. Finally, the remainder of the payload is, again, data read
-from \texttt{/dev/urandom}, and is changed every 30 seconds.
+The network test (Appendix \ref{Apdx-network}) consists of two parts: a
+transmitter and a receiver. We used a server (in the same building) to transmit
+the data, and ran a receiver on the experimental hardware. The packets
+transmitted are based on UDP, containing 1200 bytes payload. The first byte is
+a tracking number: it will increment every time the payload changes. The last
+32 bytes are a sha-256 hash of the rest of the payload. Finally, the remainder
+of the payload is, again, data read from \texttt{/dev/urandom}, and is changed
+every 30 seconds.
 
 The incremental number allows us to do a byte-by-byte check of the data, to
 compare it against the previously received packets. If it is unequal, we know
@@ -292,7 +292,7 @@ because they should give a diversity of devices. For example, the WhatsApp
 mobile application uses \texttt{whatsapp.net} rather than
 \texttt{whatsapp.com}.
 
-In table \ref{tab:bits} we show which bits were flipped for each domain.
+Table \ref{tab:bits} shows which bits were flipped for each domain.
 
 \begin{table}[H]
   \centering
@@ -392,8 +392,10 @@ causing bit flips that way.
 
 We first needed to assert how likely this is when one tries to do this
 intentionally. To test this, we used two different test suites: one by the team
-at Google's Project Zero\footnote{\url{https://github.com/google/rowhammer-test}}
-and one by Gruss et al.\cite{gruss2016rowhammer}\footnote{\url{https://github.com/IAIK/rowhammerjs}}.
+at Google's Project
+Zero\footnote{\url{https://github.com/google/rowhammer-test}} and one by Gruss
+et
+al.\cite{gruss2016rowhammer}\footnote{\url{https://github.com/IAIK/rowhammerjs}}.
 From the latter, we ran the general tests, the specific one for our Ivy Bridge
 hardware, and the JavaScript-based one.
 
@@ -427,7 +429,7 @@ the rowhammer attack as well as inventive ways of heating up the hardware, the
 latter was surprisingly resilient and we could not observe any bit flips.
 Registering and analyzing traffic from bitsquatting domains revealed that
 bitsquatting domains are still very popular, although complications in
-filtering out the traffic as well as abnormal behavior from clients contacting
+filtering out the traffic as well as abnormal behaviour from clients contacting
 the domains resulted in a very few legitimate requests.
 
 
@@ -466,8 +468,8 @@ trigger the rowhammer effect.
 
 Stucke\cite{suffixpath} described an attack relating to DNS search paths, where
 he would register domains used by clients who mistakenly add the search path to
-what was supposed to be an FQDN. Similarly, I have observed strange behaviour
-in the past where my server would query for \texttt{eno2} and
+what was supposed to be an FQDN. Similarly, we have observed strange behaviour
+in the past where servers would query for \texttt{eno2} and
 \texttt{eno2.<search\_path>}. If someone were to be able to register such a
 domain which is unintentionally queried for, they would be able to capture
 requests from such a system.
