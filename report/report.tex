@@ -430,17 +430,44 @@ TODO
 
 \section{Future Work}\label{sec:futwork}
 
-TODO
+Although we did not find any groundbreaking results in this work, we think
+there are definitely still interesting avenues to be explored:
 
-- test with mobile devices
+\subsection{Different hardware}
 
-- tests other than heat
+Similar experiments could be run on mobile devices, which are smaller and have
+higher memory densities. It is likely that there is much more electronic
+interference which could cause bit flips.
 
-- accidental rowhammer analysis
+The hardware we used was fairly old (2005). Modern hardware might give
+different results.
 
-- more realistic (modern) hardware
+Finally, the hardware we used was not allowed to be left turned on unattended.
+The room available for our experiment was unsuitable for doing work other than
+attending the computer as it ran, which severely limited how many hours we were
+able to run the experiments for. Being able to leave the system running
+unattended, over night, or perhaps running more machines in parallel, would
+yield much more data to work with.
 
-- more test machines running more hours (day and night)
+
+\subsection{Other causes of bit flips}
+
+In our experiments, we focused mainly on heat. Our hardware proved not
+vulnerable to rowhammer. Our experiments could be run with interference other
+than heat, such as electromagnetic interference.
+
+It would also be valuable to experiment with software that might accidentally
+trigger the rowhammer effect.
+
+\subsection{Other DNS-related attacks}
+
+Stucke\cite{suffixpath} described an attack relating to DNS search paths, where
+he would register domains used by clients who mistakenly add the search path to
+what was supposed to be an FQDN. Similarly, I have observed strange behaviour
+in the past where my server would query for \texttt{eno2} and
+\texttt{eno2.<search\_path>}. If someone were to be able to register such a
+domain which is unintentionally queried for, they would be able to capture
+requests from such a system.
 
 
 \printbibliography
