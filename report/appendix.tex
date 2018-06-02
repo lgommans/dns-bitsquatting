@@ -1,0 +1,319 @@
+\begin{appendices}
+
+\section{Memory test}\label{Apdx-memory}
+\begin{lstlisting}[language=C]
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#define RANDOM_SRC "/dev/urandom"
+#define P_LENGTH 4 * 1000
+#define SET_ITERATIONS 60
+#define READ_ITERATIONS 5
+
+void prnt(char *s, int l) {
+  for (int i = 0; i < l; i++)
+    printf("%x ", s[i]);
+}
+
+int main(int argc, char** argv) {
+  long alloc_size = strtol(argv[1], NULL, 10);
+  char *s = (char*)malloc(sizeof(char) * alloc_size);
+  char p1[P_LENGTH], p2[P_LENGTH], p3[P_LENGTH], pa[P_LENGTH];
+  int i = 0;
+  long shift = 0;
+  int rdm = open(RANDOM_SRC, O_RDONLY);
+  if (rdm < 0) {
+    return 1;
+  }
+
+  if (read(rdm, pa, P_LENGTH) < 0) {
+    return 3;
+  }
+
+  while (1) {
+    if (shift + P_LENGTH >= alloc_size) {
+      shift = 0;
+      if (i == SET_ITERATIONS + READ_ITERATIONS) {
+        printf("New random values\n");
+        i = -1;
+        if (read(rdm, p1, P_LENGTH) < 0 ||
+            read(rdm, pa, P_LENGTH) < 0) {
+          return 2;
+        }
+        memcpy(p2, p1, P_LENGTH);
+        memcpy(p3, p1, P_LENGTH);
+      }
+      else {
+        if (i == SET_ITERATIONS) {
+          printf("Set round complete. Reading...\n");
+        }
+      }
+      i++;
+    }
+
+    if (i < SET_ITERATIONS) {
+      memcpy(s + shift, pa, P_LENGTH);
+      memcpy(s + shift, p1, P_LENGTH);
+    }
+    else {
+      if (memcmp(s, p1, P_LENGTH)) {
+        printf("Bit flip detected. Should have been:\n");
+        prnt(p1, P_LENGTH);
+        printf("\nBut was instead:\n");
+        prnt(s, P_LENGTH);
+        printf("\n");
+        if (memcmp(p1, p2, P_LENGTH) || memcmp(p2, p3, P_LENGTH) || memcmp(p1, p3, P_LENGTH)) {
+          printf("And the pattern was corrupted.\n");
+          continue;
+        }
+      }
+    }
+    shift += P_LENGTH;
+  }
+  free(s);
+  close(rdm);
+}
+\end{lstlisting}
+
+\section{Disk test}\label{Apdx-disk}
+\begin{lstlisting}[language=Python]
+#!/usr/bin/env python3
+
+path = '/dev/sdd'
+filesize = 400e9
+patternlength = 4096 - 1
+
+
+import os, binascii
+
+testrunnum = 0
+
+while True:
+if testrunnum % 4 == 0:
+  print('Generating new pattern.')
+pattern = os.urandom(patternlength)
+
+  testrunnum += 1
+
+  f = open(path, 'wb')
+  wrotebytes = 0
+  while wrotebytes < filesize - patternlength:
+f.write(pattern)
+  wrotebytes += patternlength
+f.close()
+
+  f = open(path, 'rb')
+  readbytes = 0
+  while readbytes < filesize - patternlength:
+r = f.read(patternlength)
+  readbytes += patternlength
+  if r != pattern:
+  print('Changed! Original:')
+print(binascii.hexliy(pattern))
+  print('Result:')
+print(binascii.hexliy(r))
+  print('-------------')
+
+  print('Test run {} complete.'.format(testrunnum))
+  \end{lstlisting}
+
+  \section{Network test}\label{Apdx-network}
+  \subsection{Transmitter}
+  \begin{lstlisting}[language=C++]
+#include <sys/socket.h>
+#include <netdb.h>
+#include <memory.h>
+#include <iostream>
+#include <ctime>
+#include <openssl/sha.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+  using namespace std;
+
+void sha256(const unsigned char* str, int len, unsigned char* hash)
+{
+  SHA256_CTX sha256;
+  SHA256_Init(&sha256);
+  SHA256_Update(&sha256, str, len);
+  SHA256_Final(hash, &sha256);
+}
+
+int resolvehelper(const char* hostname, int family, const char* service, sockaddr_storage* pAddr)
+{
+  int result;
+  addrinfo* result_list = NULL;
+  addrinfo hints = {};
+  hints.ai_family = family;
+  hints.ai_socktype = SOCK_DGRAM; // without this flag, getaddrinfo will return 3x the number of addresses (one for each socket type).
+  result = getaddrinfo(hostname, service, &hints, &result_list);
+  if (result == 0)
+  {
+    //ASSERT(result_list->ai_addrlen <= sizeof(sockaddr_in));
+    memcpy(pAddr, result_list->ai_addr, result_list->ai_addrlen);
+    freeaddrinfo(result_list);
+  }
+
+  return result;
+}
+
+int main(int argc, char** argv) {
+  int evoevery = 60;  // Evolve (renew payload) every this many seconds
+  int sendbytes = 1200;  // How many bytes UDP payload? (Hash is put in the last sendbytes-hashlen_bytes bytes.)
+  int hashlen_bytes = 32;  // Length (in bytes) of the chosen hashing algorithm
+  int errlimit = 5000;  // Die after this many errors
+  int sleepDivider = 50;  // Only sleep every N transmissions, because the nanosleep call has an amazing amount of overhead, for something claiming to sleep some 'nanoseconds'...
+  //int overhead = 18 + 20 + 8;  // Overhead for each transmitted packet, in bytes (eth,ip,udp)
+  double bwcorrectionfactor = 0.93;
+
+  if (argc != 4) {
+    cout << "Usage: testnet <dst host> <port> <bandwidth-in-mbps>" << endl;
+    return 1;
+  }
+
+  int mbitpersec = strtol(argv[3], NULL, 10);  // Bandwidth limit, in megabits. Note that tx rate is only evaluated once per evolution.
+  int bwlimit = mbitpersec * 1e6 / 8;
+  int errs = 0;
+  int nextevo = 0;
+  int result = 0;
+  int sock = socket(AF_INET, SOCK_DGRAM, 0);
+
+  sockaddr_in addrListen = {}; // zero-int, sin_port is 0, which picks a random port for bind.
+  addrListen.sin_family = AF_INET;
+  result = bind(sock, (sockaddr*)&addrListen, sizeof(addrListen));
+  if (result == -1)
+  {
+    cout << "error n2";
+    return 2;
+  }
+
+  sockaddr_storage addrDest = {};
+  result = resolvehelper(argv[1], AF_INET, argv[2], &addrDest);
+  if (result != 0)
+  {
+    cout << "error n3";
+    return 3;
+  }
+
+  unsigned char* msg = new unsigned char[sendbytes];
+  unsigned char hash[hashlen_bytes];
+  int rdm = open("/dev/urandom", O_RDONLY);
+  int bytessent;
+  int evolution = 0;
+  size_t ads = sizeof(addrDest);
+  int rounds = 0;
+  int i;
+  double bytespersec;
+  struct timespec* nsleepshit = (struct timespec*) NULL;
+
+  struct timespec usleeptime = {0};
+  usleeptime.tv_sec = 0;
+  usleeptime.tv_nsec = 1e9 * (sendbytes / (double)bwlimit * sleepDivider);
+  cout << "Initial nsleeptime = " << usleeptime.tv_nsec << "ns" << endl;
+
+  while (true) {
+    int t = time(NULL);
+    if (t > nextevo) {
+      if (rounds > 0) {
+        bytespersec = (long)rounds * sendbytes / (double)evoevery * bwcorrectionfactor;
+        usleeptime.tv_nsec *= bytespersec / bwlimit;
+        cout << "Calculated bw in mbit/s = " << bytespersec / 1e6 * 8 << "; nsleeptime *= " << bytespersec / bwlimit << "; new nsleeptime = " << usleeptime.tv_nsec << endl;
+      }
+
+      read(rdm, msg, sendbytes - hashlen_bytes);
+      msg[0] = evolution % 256;
+      sha256(msg, sendbytes - hashlen_bytes, hash);
+      for (i = 0; i < hashlen_bytes; ++i) {
+        msg[sendbytes - hashlen_bytes + i] = hash[i];
+      }
+
+      cout << "Did " << rounds << " rounds. Starting evolution " << evolution << endl;
+
+      rounds = 0;
+      evolution++;
+      nextevo = t + evoevery;
+    }
+
+    bytessent = sendto(sock, msg, sendbytes, 0, (sockaddr*)&addrDest, ads);
+    if (bytessent != sendbytes) {
+      cout << "WARN: bytessent = " << bytessent << endl;
+      if (errs > errlimit) {
+        return 4;
+      }
+      errs++;
+    }
+
+    rounds++;
+    if (rounds % sleepDivider == 0) {
+      nanosleep(&usleeptime, nsleepshit);
+    }
+  }
+
+  close(rdm);
+  return 0;
+}
+\end{lstlisting}
+
+\subsection{Receiver}
+\begin{lstlisting}[language=Python]
+#!/usr/bin/env pypy
+
+import sys, socket, hashlib, binascii
+
+hashlen_bytes = 32  # The length of the chosen message digest, in bytes
+msglen = 1200  # Bytes that should be in each packet
+errlimit = 5000  # Die after this many errors
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  sock.bind(('', int(sys.argv[1])))
+
+  lastevo = None
+  lastdata = None
+  rounds = 0
+  errs = 0
+
+  def err():
+    global errs
+    if errs > errlimit:
+  print('Exiting due to too many errors.')
+   exit(5)
+   errs += 1
+
+   while True:
+data = sock.recv(msglen)
+  if len(data) != msglen:
+  print('WARN: data length incorrect.')
+err()
+
+  if data[0] != lastevo:
+  print('New evo after {} rounds.'.format(rounds))
+  rounds = 0
+
+  if data[0] != lastevo or not data == lastdata:
+  if data[-hashlen_bytes:] == hashlib.sha256(data[:-hashlen_bytes]).digest():
+    if data != lastdata and data[0] == lastevo:
+    print('Note: new data, same evo, but correct hash.')
+
+    lastdata = data
+    lastevo = data[0]
+    else:
+err()
+  print('Hash error in data:')
+print(binascii.hexlify(data))
+  if data[0] == lastevo:
+  print('Correct was:')
+print(binascii.hexlify(lastdata))
+  else:
+  lastdata = None
+
+  rounds += 1
+  \end{lstlisting}
+
+  \end{appendices}
