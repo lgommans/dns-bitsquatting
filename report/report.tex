@@ -4,10 +4,10 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage[pdftex,
-			%final,
+			final,
             pdfauthor={Adrien Raulot and Luc Gommans},
-            pdftitle={TODO},
-            pdfkeywords={TODO}]{hyperref}
+            pdftitle={DNS bitsquatting in 2018},
+            pdfkeywords={dns bit flip error domain squatting}]{hyperref}
 \usepackage{wrapfig}
 \usepackage{booktabs}
 \hypersetup{
@@ -32,8 +32,7 @@
 
 \begin{document}
 
-%TODO final title?
-\title{DNS bitsquatting: a review of bit-flip abuse in Domain Squatting\\\vspace{5mm} \large  \today}
+\title{DNS bitsquatting in 2018\\\vspace{5mm} \large  \today}
 \author{
 \IEEEauthorblockN{Adrien Raulot}
 \IEEEauthorblockA{
@@ -75,14 +74,17 @@ In this paper we will investigate likely causes for bit flips in desktop
 computers and attempt to determine whether the resulting attack, bitsquatting,
 is still viable.
 
-%TODO: insert a disorderly substitute for a table of contents here, because
-%that's how Science(TM) likes it.
-First, we will describe three experiments about using heat as a fault injection
-technique as well as the rowhammer attack to produce bit flips and registering
-and monitoring bitsquat domains. Second, we will examine the results of our bit
-flip experiments and give key information about the traffic captured from our
-domains. Finally, from the results of the experiments, we will conclude with a
-brief assessment of the current state of DNS bitsquatting.
+In the next section, we will define our research questions, followed by ethical
+considerations in Section \ref{sec:ethics}. In Section \ref{sec:relwork} we
+discuss previous work in this area. In the following three sections we will
+describe our experiments and give the results: Section \ref{sec:exp1} describes
+our experiment trying to cause bit flips by applying heat, \ref{sec:exp2}
+describes bitsquatting domains we registered and monitored, and \ref{sec:exp3}
+describes trying to cause bit flips using rowhammer. The results are briefly
+discussed in Section \ref{sec:disc}. Finally, a conclusion is drawn in Section
+\ref{sec:conc} and possible future work is discussed in section
+\ref{sec:futwork}.
+
 
 \section{Research Questions}\label{sec:researchq}
 
@@ -133,11 +135,11 @@ popular by monitoring newly registered bitsquat domains over a period of
 270 days. In this period, a total of 5 366 different bitsquat domains were
 registered, targeting 491 out of the Alexa top 500 domains.
 
-\section{Experiment 1: Heating}
+\section{Experiment 1: Heating}\label{sec:exp1}
 
 Although random bit flips are theoretically possible, the unlikeliness of a bit
-flip in practice is important. Bit flips are soft errors more likely to
-occur in certain circumstances such as high temperature, low voltage, high
+flip in practice is important. Bit flips are soft errors, which are more likely
+to occur in certain circumstances such as high temperature, low voltage, high
 speed, alpha particles, cosmic rays, and others. This not only may have an
 impact on the applications running on a system, but also raises security
 concerns as attacks, such as the bitsquatting attack we describe in this paper
@@ -243,7 +245,7 @@ since the majority of the time was spent on I/O. Running all scripts in
 parallel also had the effect of putting the system under full load, generating
 a lot of heat.
 
-\subsection{Experiment 1: Results}
+\subsection{Experiment 1: Results}\label{sub:exp1r}
 
 During the experiment, we examined the logs periodically to see that the
 experiments were running correctly and to see whether any bit flips had
@@ -280,7 +282,7 @@ without any issues.
 \end{figure}
 
 
-\section{Experiment 2: Bitsquatting}
+\section{Experiment 2: Bitsquatting}\label{sec:exp2}
 
 For our second experiment, we registered and monitored 5 domains:
 
@@ -321,7 +323,6 @@ Table \ref{tab:bits} shows which bits were flipped for each domain.
    \end{tabular}
 \end{table}
 
-%TODO this paragraph should be separate somewhere
 We noticed that for many domains which we would have liked to register, such as
 bitsquats of \texttt{google.com} or \texttt{facebook.com}, the domains were
 already occupied. For \texttt{google.com}, many of the domains are owned by
@@ -344,7 +345,7 @@ We used tcpdump's pcap-writing functionality to monitor this usage. Each of the
 used IP addresses referred to the same server, making monitoring easier.
 
 
-\subsection{Experiment 2: Results}
+\subsection{Experiment 2: Results}\label{sub:exp2r}
 
 The control domain received 3 500 hits from the registrar (SIDN) and partners
 (OpenIntel). These queried for various record types for the domain and the
@@ -393,7 +394,7 @@ Amazon AWS and Google (presumably their AWS-equivalent), as well as various
 research institutes and other services which advertise themselves as DNS
 scanners.
 
-\section{Experiment 3: Rowhammer}
+\section{Experiment 3: Rowhammer}\label{sec:exp3}
 
 High memory densities create an increased rate of electromagnetic interactions
 between memory cells\cite{kim2014flipping}. Our third experiment focuses on
@@ -410,14 +411,12 @@ From the latter, we ran the general tests, the specific one for our Ivy Bridge
 hardware, and the JavaScript-based one.
 
 
-\subsection{Experiment 3: Results}
+\subsection{Experiment 3: Results}\label{sub:exp3r}
 
 The experimental hardware for experiment 1 (Section \ref{desktop-setup}) is
 definitely not vulnerable, as the memory is too old. On our server and
 workstations, the test suites did not manage to trigger the attack. It appears
 that our hardware is not vulnerable.
-
-%TODO this is rather brief, but not sure what more to say. Maybe something like "well if we can't even trigger it when we *try*..."
 
 
 \section{Discussion}\label{sec:disc}
