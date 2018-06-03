@@ -33,7 +33,7 @@
 \begin{document}
 
 %TODO final title?
-\title{DNS bitsquatting\\\vspace{5mm} \large  \today}
+\title{DNS bitsquatting: a review of bit-flip abuse in Domain Squatting\\\vspace{5mm} \large  \today}
 \author{
 \IEEEauthorblockN{Adrien Raulot}
 \IEEEauthorblockA{
@@ -75,8 +75,14 @@ In this paper we will investigate likely causes for bit flips in desktop
 computers and attempt to determine whether the resulting attack, bitsquatting,
 is still viable.
 
-%TODO: insert a disorderly substitute for a table of contents here, because that's how Science(TM) likes it.
-
+%TODO: insert a disorderly substitute for a table of contents here, because
+%that's how Science(TM) likes it.
+First, we will describe three experiments about using heat as a fault injection
+technique as well as the rowhammer attack to produce bit flips and registering
+and monitoring bitsquat domains. Second, we will examine the results of our bit
+flip experiments and give key information about the traffic captured from our
+domains. Finally, from the results of the experiments, we will conclude with a
+brief assessment of the current state of DNS bitsquatting.
 
 \section{Research Questions}\label{sec:researchq}
 
@@ -123,8 +129,8 @@ popular domains to domains registered by malicious entities. Since 2011, very
 few research papers have been published about bitsquatting, hence this
 research. Another research from 2011 by Nick et
 al.\cite{nikiforakis2013bitsquatting} showed that bitsquatting was still
-popular by monitoring newly registered bitsquatting domains over a period of
-270 days. In this period, a total of 5 366 different bitsquatting domains were
+popular by monitoring newly registered bitsquat domains over a period of
+270 days. In this period, a total of 5 366 different bitsquat domains were
 registered, targeting 491 out of the Alexa top 500 domains.
 
 \section{Experiment 1: Heating}
@@ -212,8 +218,6 @@ low. This only occurred when the target system was too busy to drain its
 receive buffer, and was not caused by network equipment. We consider this to
 have no impact on our results.
 
-%TODO source code
-
 \subsection{Desktop setup}
 
 The desktop contains $2\times2$GB DDR2 RAM memory, an Intel Pentium D processor
@@ -289,7 +293,7 @@ For our second experiment, we registered and monitored 5 domains:
 \end{itemize}
 
 The latter is a control domain, registered to be able to see the difference
-between a bitsquatting domain and any other, unlisted domain. We picked the
+between a bitsquat domain and any other, unlisted domain. We picked the
 name using a random number generator to make sure users did not stumble upon it
 by accident. The name is short, so that it can be brute-forced by NSEC3 walks
 (the \texttt{.nl} zone is DNSSEC-enabled). If our other domains are being found
@@ -305,7 +309,7 @@ Table \ref{tab:bits} shows which bits were flipped for each domain.
 
 \begin{table}[H]
   \centering
-  \caption{Bitsquatting vs. original domain names}
+  \caption{Bitsquat vs. original domain names}
   \label{tab:bits}
   \begin{tabular}{|l|l|l|}
     \hline
@@ -420,13 +424,13 @@ manage to trigger the attack. It appears that our hardware is not vulnerable.
 
 \section{Discussion}\label{sec:disc}
 
-Since part of our bitsquatting domains ingress traffic was comming from
+Since part of our bitsquat domains ingress traffic was comming from
 research institutes such as universities or laboratories and there is no easy
 way to prevent this, it was very difficult to filter the noisy traffic out from
 the legitimate traffic caused by bit flips. This also poses a design problem
 about bitsquatting experiments, the fact that researchers monitoring the
-Internet for bitsquatting domains used by attackers end up querying
-bitsquatting domains set up by other researchers. Moreover, traffic monitoring
+Internet for bitsquat domains used by attackers end up querying
+bitsquat domains set up by other researchers. Moreover, traffic monitoring
 experiments should be carried out during a longer period, as three weeks is not
 enough to be able to clearly identify interesting traffic due to bit flips.
 
