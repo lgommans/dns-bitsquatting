@@ -136,7 +136,7 @@ registered, targeting 491 out of the Alexa top 500 domains.
 \section{Experiment 1: Heating}
 
 Although random bit flips are theoretically possible, the unlikeliness of a bit
-flip in practice is important. Bit flips or soft errors are more likely to
+flip in practice is important. Bit flips are soft errors more likely to
 occur in certain circumstances such as high temperature, low voltage, high
 speed, alpha particles, cosmic rays, and others. This not only may have an
 impact on the applications running on a system, but also raises security
@@ -218,7 +218,7 @@ low. This only occurred when the target system was too busy to drain its
 receive buffer, and was not caused by network equipment. We consider this to
 have no impact on our results.
 
-\subsection{Desktop setup}
+\subsection{Desktop setup}\label{desktop-setup}
 
 The desktop contains $2\times2$GB DDR2 RAM memory, an Intel Pentium D processor
 and a 2TB Hitachi hard disk drive. More recent hardware was not considered
@@ -393,9 +393,6 @@ Amazon AWS and Google (presumably their AWS-equivalent), as well as various
 research institutes and other services which advertise themselves as DNS
 scanners.
 
-% TODO: check if complete
-
-
 \section{Experiment 3: Rowhammer}
 
 High memory densities create an increased rate of electromagnetic interactions
@@ -415,16 +412,17 @@ hardware, and the JavaScript-based one.
 
 \subsection{Experiment 3: Results}
 
-The experimental hardware for experiment 1 is definitely not vulnerable, as the
-memory is too old. On our server and workstations, the test suites did not
-manage to trigger the attack. It appears that our hardware is not vulnerable.
+The experimental hardware for experiment 1 (Section \ref{desktop-setup}) is
+definitely not vulnerable, as the memory is too old. On our server and
+workstations, the test suites did not manage to trigger the attack. It appears
+that our hardware is not vulnerable.
 
 %TODO this is rather brief, but not sure what more to say. Maybe something like "well if we can't even trigger it when we *try*..."
 
 
 \section{Discussion}\label{sec:disc}
 
-Since part of our bitsquat domains ingress traffic was comming from
+Since part of our bitsquat domains ingress traffic was coming from
 research institutes such as universities or laboratories and there is no easy
 way to prevent this, it was very difficult to filter the noisy traffic out from
 the legitimate traffic caused by bit flips. This also poses a design problem
@@ -440,14 +438,14 @@ enough to be able to clearly identify interesting traffic due to bit flips.
 We conclude that DNS errors due to bit flips are rare, as we have not been able
 to find any while observing bitsquat domains for several weeks, nor have we
 been able to produce any bit errors ourselves even under unrealistically
-hostile circumstances. Our hardware proved very resilient to heat.
+hostile circumstances. Our hardware proved to be very resilient to heat.
 
 Organisations do not seem to be pre-emptively buying bitsquat domains to
 mitigate the attack. It is likely that large corporations such as Google would
 have looked into this after the publication by Dinaburg in 2011, and would have
 registered the domains if it had been deemed a reasonable attack vector.
 
-Finally, our hardware also proved resilient to rowhammer. Even if there is
+Finally, our hardware also proved to be resilient to rowhammer. Even if there is
 software which could accidentally cause cell leakage and corrupt DNS (or other)
 memory this way, the hardware itself still needs to be vulnerable.
 
@@ -475,7 +473,7 @@ yield much more data to work with.
 
 \subsection{Other causes of bit flips}
 
-In our experiments, we focused mainly on heat. Our hardware proved not
+In our experiments, we focused mainly on heat. Our hardware proved not to be
 vulnerable to rowhammer. Our experiments could be run with interference other
 than heat, such as electromagnetic interference.
 
