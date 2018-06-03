@@ -1,5 +1,6 @@
 \documentclass[conference]{IEEEtran}
 %\usepackage[titletoc]{appendix}
+\usepackage{gensymb}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage[pdftex,
@@ -235,38 +236,47 @@ the memory.
 During the tests, we run the three scripts in parallel. The CPU is a dual core
 without hyperthreading, so our network receive and RAM test scripts could run
 in parallel at nearly full speed. The disk test script also ran at full speed,
-since the majority of the time was spent on I/O. This also had the effect of
-putting the system under full load, generating a lot of heat.
-
-Because the machine did not reach thermal cut-off temperature and did not
-produce any bit errors yet, we later also covered it with a cloth to prevent
-heat from dissipating through the metal cover. While this had a bigger impact
-on the overall internal temperature, we were not able to produce any bit flips
-or reach cut-off temperature. Finally, we attempted heating the memory modules
-with a hair dryer, similar to the memory corruption experiments described by
-\cite{jvm}. This experiment was halted when the hair dryer started melting and the
-computer continued to run without any issues.
+since the majority of the time was spent on I/O. Running all scripts in
+parallel also had the effect of putting the system under full load, generating
+a lot of heat.
 
 \subsection{Experiment 1: Results}
 
-The following table shows milestones in the temperature increase during the
-experiments:
+During the experiment, we examined the logs periodically to see that the
+experiments were running correctly and to see whether any bit flips had
+manifested. The machine became less responsive at very high temperatures, but
+at no point did any bit flips occur. Because we also could not read the current
+CPU frequency, we do not know whether it throttled back. When measuring the
+temperature of the components after this test, we measured 93\degree{}C on the
+CPU cooler, 59\degree{}C on the hard drive (internal sensor) and 65\degree{}C
+on the RAM memory.
 
-%TODO: Very basic for now, more for clear visualization
-\begin{table}[H]
-  \centering
-  \caption{Temperature levels during experiments}
-  \label{table-temp}
-  \begin{tabular}{|l|l|l|}
-    \hline
-    \textbf{Component}   & \textbf{Min. (Celsius)} & \textbf{Max. (Celsius)}\\ \hline
-    CPU   & 55 & 96 \\ \hline
-    Memory & N/A & 90 \\ \hline
-    Disk & 44 & 60 \\ \hline
-   \end{tabular}
-\end{table}
+Because the machine did not reach thermal cut-off temperature and did not
+produce any bit flips yet, we then covered it with a cloth to prevent heat from
+dissipating through the metal cover. While this had a bigger impact on the
+overall internal temperature, raising the hard drive and RAM memory by almost
+10\degree{}C, we were not able to produce any bit flips or reach cut-off
+temperature.
 
-\newpage
+Finally, in a third setup, we attempted heating the memory modules with a hair
+dryer, similar to the memory corruption experiments described by Govindavajhala
+and Appel\cite{jvm}. This had to be done with the case open, thus only heating
+the memory and nearby components, but as Govindavajhala and Appel described
+that similar memory to ours would start producing errors at 80--100\degree{}C,
+we thought it worthwhile to focus on the RAM only. See figure
+\ref{fig:hairdryer} for the experimental setup. This experiment was halted when
+the hair dryer started melting, the thermometer started giving incorrect
+readouts because it had heated up itself, and the computer continued to run
+without any issues.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.49\textwidth]{hairdryer.jpg}
+	\caption{Third experimental setup}
+	\label{fig:hairdryer}
+\end{figure}
+
+
 \section{Experiment 2: Bitsquatting}
 
 For our second experiment, we registered and monitored 5 domains:
@@ -361,12 +371,12 @@ original address) immediately attempts to contact the IP address that we
 returned. They often attempt to contact a random port, not used by the service
 we are bitsquatting.
 
-Another query we attempted filters on addresses which we only saw 1-4 times and
-which queried for both the A and AAAA records. It is typical to query for both,
-so a legitimate client should do that. This yielded only 58 records: some from
-Google and some from DigitalOcean, but also some promising-looking resolvers
-such as from Level3. Looking in pcaps again, we found no normal follow-up
-traffic.
+Another query we attempted filters on addresses which we only saw 1--4 times
+and which queried for both the A and AAAA records. It is typical to query for
+both, so a legitimate client should do that. This yielded only 58 records: some
+from Google and some from DigitalOcean, but also some promising-looking
+resolvers such as from Level3. Looking in pcaps again, we found no normal
+follow-up traffic.
 
 No matter how we cut or slice the dataset, in no case does an IP address show
 both normal resolver behaviour and follow up with normal traffic. Some of the
@@ -414,29 +424,34 @@ manage to trigger the attack. It appears that our hardware is not vulnerable.
 Since part of our bitsquatting domains ingress traffic was comming from
 research institutes such as universities or laboratories and there is no easy
 way to prevent this, it was very difficult to filter the noisy traffic out from
-the legitimate and potentially bitflip-related traffic. This also poses a
-design problem about bitsquatting experiments, the fact that researchers
-monitoring the Internet for bitsquatting domains used by attackers end up
-querying bitsquatting domains set up by other researchers. Moreover, traffic
-monitoring experiments should be carried out during a longer period, as three
-weeks is not enough to be able to clearly identify interesting traffic due to
-bit flips.
+the legitimate traffic caused by bit flips. This also poses a design problem
+about bitsquatting experiments, the fact that researchers monitoring the
+Internet for bitsquatting domains used by attackers end up querying
+bitsquatting domains set up by other researchers. Moreover, traffic monitoring
+experiments should be carried out during a longer period, as three weeks is not
+enough to be able to clearly identify interesting traffic due to bit flips.
+
 
 \section{Conclusion}\label{sec:conc}
 
-After several tentatives to produce bit flips in a desktop computer by using
-the rowhammer attack as well as inventive ways of heating up the hardware, the
-latter was surprisingly resilient and we could not observe any bit flips.
-Registering and analyzing traffic from bitsquatting domains revealed that
-bitsquatting domains are still very popular, although complications in
-filtering out the traffic as well as abnormal behaviour from clients contacting
-the domains resulted in a very few legitimate requests.
+We conclude that DNS errors due to bit flips are rare, as we have not been able
+to find any while observing bitsquat domains for several weeks, nor have we
+been able to produce any bit errors ourselves even under unrealistically
+hostile circumstances. Our hardware proved very resilient to heat.
+
+Organisations do not seem to be pre-emptively buying bitsquat domains to
+mitigate the attack. It is likely that large corporations such as Google would
+have looked into this after the publication by Dinaburg in 2011, and would have
+registered the domains if it had been deemed a reasonable attack vector.
+
+Finally, our hardware also proved resilient to rowhammer. Even if there is
+software which could accidentally cause cell leakage and corrupt DNS (or other)
+memory this way, the hardware itself still needs to be vulnerable.
 
 
 \section{Future Work}\label{sec:futwork}
 
-Although we did not find any groundbreaking results in this work, we think
-there are definitely still interesting avenues to be explored:
+We expect the following areas to be interesting as future work:
 
 \subsection{Different hardware}
 
@@ -451,7 +466,7 @@ Finally, the hardware we used was not allowed to be left turned on unattended.
 The room available for our experiment was unsuitable for doing work other than
 attending the computer as it ran, which severely limited how many hours we were
 able to run the experiments for. Being able to leave the system running
-unattended, over night, or perhaps running more machines in parallel, would
+unattended and over night, or perhaps running more machines in parallel, would
 yield much more data to work with.
 
 
@@ -461,18 +476,18 @@ In our experiments, we focused mainly on heat. Our hardware proved not
 vulnerable to rowhammer. Our experiments could be run with interference other
 than heat, such as electromagnetic interference.
 
-It would also be valuable to experiment with software that might accidentally
-trigger the rowhammer effect.
+On hardware vulnerable to rowhammer, it would also be valuable to experiment
+with software that might accidentally trigger cell bleeding.
 
 \subsection{Other DNS-related attacks}
 
 Stucke\cite{suffixpath} described an attack relating to DNS search paths, where
-he would register domains used by clients who mistakenly add the search path to
-what was supposed to be an FQDN. Similarly, we have observed strange behaviour
-in the past where servers would query for \texttt{eno2} and
-\texttt{eno2.<search\_path>}. If someone were to be able to register such a
-domain which is unintentionally queried for, they would be able to capture
-requests from such a system.
+he would register domains mistakenly used by clients, for example by mistakenly
+adding the search path to what was supposed to be an FQDN. For example, we have
+observed strange behaviour in unrelated experiments, where servers would query
+for \texttt{eno2} (an interface name) and \texttt{eno2.<search\_path>}. If
+someone were to register a domain which is unintentionally queried for, they
+would be able to capture requests from such a system.
 
 
 \printbibliography
